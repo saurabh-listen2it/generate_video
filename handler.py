@@ -176,45 +176,42 @@ def handler(job):
     seed = job_input.get("seed", 42)
     cfg = job_input.get("cfg", 2.0)
 
-    # Ortak parametreleri uygula
-    prompt["135"]["inputs"]["positive_prompt"] = job_input["prompt"]
-    prompt["135"]["inputs"]["negative_prompt"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
+    # Ortak parametreleri uygula (Node 16: Text Encode)
+    prompt["16"]["inputs"]["positive"] = job_input["prompt"]
+    prompt["16"]["inputs"]["negative"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
     
-    # Sampler seed/cfg ayarları
-    if "220" in prompt:
-        prompt["220"]["inputs"]["seed"] = seed
-    if "540" in prompt:
-        prompt["540"]["inputs"]["seed"] = seed
-        # T2V'de CFG Scheduler kullanılıyor
-        if "570" in prompt:
-             prompt["570"]["inputs"]["cfg_scale_start"] = cfg
-             prompt["570"]["inputs"]["cfg_scale_end"] = cfg
+    # Sampler seed/cfg ayarları (Node 27: HIGH, Node 54: LOW)
+    if "27" in prompt:
+        prompt["27"]["inputs"]["seed"] = seed
+        prompt["27"]["inputs"]["cfg"] = cfg
+        # Steps ayarı (HIGH için oranlanabilir ama şimdilik sabit)
+        prompt["27"]["inputs"]["steps"] = steps
+        
+    if "54" in prompt:
+        prompt["54"]["inputs"]["seed"] = seed
+        prompt["54"]["inputs"]["cfg"] = cfg
+        prompt["54"]["inputs"]["steps"] = steps
 
-    # Çözünürlük ayarları
+    # Çözünürlük ve Kare Sayısı (Node 37: WanVideoEmptyEmbeds)
     original_width = job_input.get("width", 480)
     original_height = job_input.get("height", 832)
     adjusted_width = to_nearest_multiple_of_16(original_width)
     adjusted_height = to_nearest_multiple_of_16(original_height)
     
-    if "235" in prompt: prompt["235"]["inputs"]["value"] = adjusted_width
-    if "236" in prompt: prompt["236"]["inputs"]["value"] = adjusted_height
-
-    # Kare sayısı ve context ayarları (T2V 노드 541)
-    if "541" in prompt:
-        prompt["541"]["inputs"]["num_frames"] = length
+    if "37" in prompt: 
+        prompt["37"]["inputs"]["width"] = adjusted_width
+        prompt["37"]["inputs"]["height"] = adjusted_height
+        prompt["37"]["inputs"]["length"] = length
             
-    if "498" in prompt:
-        prompt["498"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
-        prompt["498"]["inputs"]["context_frames"] = length
-
-    # Step ayarları
-    if "569" in prompt:
-        prompt["569"]["inputs"]["value"] = steps
+    # Context Options (Node 40)
+    if "40" in prompt:
+        prompt["40"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
+        prompt["40"]["inputs"]["context_frames"] = length
     
-    # LoRA 설정 적용
+    # LoRA 설정 적용 (Node 60: HIGH, Node 62: LOW)
     if lora_count > 0:
-        high_lora_node_id = "279"
-        low_lora_node_id = "553"
+        high_lora_node_id = "60"
+        low_lora_node_id = "62"
         
         for i, lora_pair in enumerate(lora_pairs):
             if i < 4:
