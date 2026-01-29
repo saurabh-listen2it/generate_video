@@ -150,18 +150,25 @@ def handler(job):
     logger.info(f"Received job input: {job_input}")
     task_id = f"task_{uuid.uuid4()}"
 
-    # 이미지 입력 처리 (image_path, image_url, image_base64 중 하나만 사용)
+    # T2V veya I2V modunu belirle
+    is_t2v = False
+    if "image_path" not in job_input and "image_url" not in job_input and "image_base64" not in job_input:
+        is_t2v = True
+        logger.info("Görsel girişi bulunamadı. Text-to-Video moduna geçiliyor.")
+
+    # 이미지 입력 처리 (I2V modunda ise)
     image_path = None
-    if "image_path" in job_input:
-        image_path = process_input(job_input["image_path"], task_id, "input_image.jpg", "path")
-    elif "image_url" in job_input:
-        image_path = process_input(job_input["image_url"], task_id, "input_image.jpg", "url")
-    elif "image_base64" in job_input:
-        image_path = process_input(job_input["image_base64"], task_id, "input_image.jpg", "base64")
-    else:
-        # 기본값 사용
-        image_path = "/example_image.png"
-        logger.info("기본 이미지 파일을 사용합니다: /example_image.png")
+    if not is_t2v:
+        if "image_path" in job_input:
+            image_path = process_input(job_input["image_path"], task_id, "input_image.jpg", "path")
+        elif "image_url" in job_input:
+            image_path = process_input(job_input["image_url"], task_id, "input_image.jpg", "url")
+        elif "image_base64" in job_input:
+            image_path = process_input(job_input["image_base64"], task_id, "input_image.jpg", "base64")
+        else:
+            # 기본값 사용 (Zorunlu I2V durumunda)
+            image_path = "/example_image.png"
+            logger.info("기본 이미지 파일을 사용합니다: /example_image.png")
 
     # 엔드 이미지 입력 처리 (end_image_path, end_image_url, end_image_base64 중 하나만 사용)
     end_image_path_local = None
@@ -177,79 +184,94 @@ def handler(job):
     
     # 최대 4개 LoRA까지 지원
     lora_count = min(len(lora_pairs), 4)
-    if lora_count > len(lora_pairs):
-        logger.warning(f"LoRA 개수가 {len(lora_pairs)}개입니다. 최대 4개까지만 지원됩니다. 처음 4개만 사용합니다.")
-        lora_pairs = lora_pairs[:4]
     
-    # 워크플로우 파일 선택 (end_image_*가 있으면 FLF2V 워크플로 사용)
-    workflow_file = "/new_Wan22_flf2v_api.json" if end_image_path_local else "/new_Wan22_api.json"
-    logger.info(f"Using {'FLF2V' if end_image_path_local else 'single'} workflow with {lora_count} LoRA pairs")
+    # 워크플로우 파일 선택
+    if is_t2v:
+        workflow_file = "/wan22_t2v_api.json"
+    elif end_image_path_local:
+        workflow_file = "/new_Wan22_flf2v_api.json"
+    else:
+        workflow_file = "/new_Wan22_api.json"
+        
+    logger.info(f"Using {'T2V' if is_t2v else ('FLF2V' if end_image_path_local else 'I2V')} workflow with {lora_count} LoRA pairs")
     
     prompt = load_workflow(workflow_file)
     
     length = job_input.get("length", 81)
     steps = job_input.get("steps", 10)
+    seed = job_input.get("seed", 42)
+    cfg = job_input.get("cfg", 2.0)
 
-    prompt["244"]["inputs"]["image"] = image_path
-    prompt["541"]["inputs"]["num_frames"] = length
+    # Ortak parametreleri uygula
     prompt["135"]["inputs"]["positive_prompt"] = job_input["prompt"]
     prompt["135"]["inputs"]["negative_prompt"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
-    prompt["220"]["inputs"]["seed"] = job_input["seed"]
-    prompt["540"]["inputs"]["seed"] = job_input["seed"]
-    prompt["540"]["inputs"]["cfg"] = job_input["cfg"]
-    # 해상도(폭/높이) 16배수 보정
-    original_width = job_input["width"]
-    original_height = job_input["height"]
+    
+    # Sampler seed/cfg ayarları
+    if "220" in prompt:
+        prompt["220"]["inputs"]["seed"] = seed
+    if "540" in prompt:
+        prompt["540"]["inputs"]["seed"] = seed
+        # T2V'de CFG Scheduler kullanılıyor olabilir, kontrol et
+        if "570" in prompt:
+             prompt["570"]["inputs"]["cfg_scale_start"] = cfg
+             prompt["570"]["inputs"]["cfg_scale_end"] = cfg
+        else:
+             prompt["540"]["inputs"]["cfg"] = cfg
+
+    # Çözünürlük ayarları
+    original_width = job_input.get("width", 480)
+    original_height = job_input.get("height", 832)
     adjusted_width = to_nearest_multiple_of_16(original_width)
     adjusted_height = to_nearest_multiple_of_16(original_height)
-    if adjusted_width != original_width:
-        logger.info(f"Width adjusted to nearest multiple of 16: {original_width} -> {adjusted_width}")
-    if adjusted_height != original_height:
-        logger.info(f"Height adjusted to nearest multiple of 16: {original_height} -> {adjusted_height}")
-    prompt["235"]["inputs"]["value"] = adjusted_width
-    prompt["236"]["inputs"]["value"] = adjusted_height
-    prompt["498"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
-    prompt["498"]["inputs"]["context_frames"] = length
+    
+    if "235" in prompt: prompt["235"]["inputs"]["value"] = adjusted_width
+    if "236" in prompt: prompt["236"]["inputs"]["value"] = adjusted_height
 
-    # step 설정 적용
+    # Kare sayısı ve context ayarları
+    if "541" in prompt:
+        prompt["541"]["inputs"]["num_frames"] = length
+        # I2V modunda görsel yolunu set et
+        if not is_t2v:
+            prompt["244"]["inputs"]["image"] = image_path
+            
+    if "498" in prompt:
+        prompt["498"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
+        prompt["498"]["inputs"]["context_frames"] = length
+
+    # Step ayarları
+    if "569" in prompt:
+        prompt["569"]["inputs"]["value"] = steps
+    
+    # Geleneksel step ayarı (varsa)
     if "834" in prompt:
         prompt["834"]["inputs"]["steps"] = steps
-        logger.info(f"Steps set to: {steps}")
         lowsteps = int(steps*0.6)
-        prompt["829"]["inputs"]["step"] = lowsteps
-        logger.info(f"LowSteps set to: {lowsteps}")
+        if "829" in prompt:
+            prompt["829"]["inputs"]["step"] = lowsteps
 
-    # 엔드 이미지가 있는 경우 617번 노드에 경로 적용 (FLF2V 전용)
-    if end_image_path_local:
+    # 엔드 이미지가 있는 경우 (FLF2V)
+    if end_image_path_local and "617" in prompt:
         prompt["617"]["inputs"]["image"] = end_image_path_local
     
-    # LoRA 설정 적용 - HIGH LoRA는 노드 279, LOW LoRA는 노드 553
+    # LoRA 설정 적용
     if lora_count > 0:
-        # HIGH LoRA 노드 (279번)
         high_lora_node_id = "279"
-        
-        # LOW LoRA 노드 (553번)
         low_lora_node_id = "553"
         
-        # 입력받은 LoRA pairs 적용 (lora_1부터 시작)
         for i, lora_pair in enumerate(lora_pairs):
-            if i < 4:  # 최대 4개까지만
+            if i < 4:
                 lora_high = lora_pair.get("high")
                 lora_low = lora_pair.get("low")
                 lora_high_weight = lora_pair.get("high_weight", 1.0)
                 lora_low_weight = lora_pair.get("low_weight", 1.0)
                 
-                # HIGH LoRA 설정 (노드 279번, lora_1부터 시작)
-                if lora_high:
+                if lora_high and high_lora_node_id in prompt:
                     prompt[high_lora_node_id]["inputs"][f"lora_{i+1}"] = lora_high
                     prompt[high_lora_node_id]["inputs"][f"strength_{i+1}"] = lora_high_weight
-                    logger.info(f"LoRA {i+1} HIGH applied to node 279: {lora_high} with weight {lora_high_weight}")
                 
-                # LOW LoRA 설정 (노드 553번, lora_1부터 시작)
-                if lora_low:
+                if lora_low and low_lora_node_id in prompt:
                     prompt[low_lora_node_id]["inputs"][f"lora_{i+1}"] = lora_low
                     prompt[low_lora_node_id]["inputs"][f"strength_{i+1}"] = lora_low_weight
-                    logger.info(f"LoRA {i+1} LOW applied to node 553: {lora_low} with weight {lora_low_weight}")
 
     ws_url = f"ws://{server_address}:8188/ws?clientId={client_id}"
     logger.info(f"Connecting to WebSocket: {ws_url}")
