@@ -150,50 +150,20 @@ def handler(job):
     logger.info(f"Received job input: {job_input}")
     task_id = f"task_{uuid.uuid4()}"
 
-    # T2V veya I2V modunu belirle
-    is_t2v = False
-    if "image_path" not in job_input and "image_url" not in job_input and "image_base64" not in job_input:
-        is_t2v = True
-        logger.info("Görsel girişi bulunamadı. Text-to-Video moduna geçiliyor.")
+    # Sadece Text-to-Video (T2V) destekleniyor
+    is_t2v = True
+    logger.info("Sadece Text-to-Video modu aktif. Görsel girişleri yoksayılıyor.")
 
-    # 이미지 입력 처리 (I2V modunda ise)
-    image_path = None
-    if not is_t2v:
-        if "image_path" in job_input:
-            image_path = process_input(job_input["image_path"], task_id, "input_image.jpg", "path")
-        elif "image_url" in job_input:
-            image_path = process_input(job_input["image_url"], task_id, "input_image.jpg", "url")
-        elif "image_base64" in job_input:
-            image_path = process_input(job_input["image_base64"], task_id, "input_image.jpg", "base64")
-        else:
-            # 기본값 사용 (Zorunlu I2V durumunda)
-            image_path = "/example_image.png"
-            logger.info("기본 이미지 파일을 사용합니다: /example_image.png")
-
-    # 엔드 이미지 입력 처리 (end_image_path, end_image_url, end_image_base64 중 하나만 사용)
-    end_image_path_local = None
-    if "end_image_path" in job_input:
-        end_image_path_local = process_input(job_input["end_image_path"], task_id, "end_image.jpg", "path")
-    elif "end_image_url" in job_input:
-        end_image_path_local = process_input(job_input["end_image_url"], task_id, "end_image.jpg", "url")
-    elif "end_image_base64" in job_input:
-        end_image_path_local = process_input(job_input["end_image_base64"], task_id, "end_image.jpg", "base64")
-    
     # LoRA 설정 확인 - 배열로 받아서 처리
     lora_pairs = job_input.get("lora_pairs", [])
     
     # 최대 4개 LoRA까지 지원
     lora_count = min(len(lora_pairs), 4)
     
-    # 워크플로우 파일 선택
-    if is_t2v:
-        workflow_file = "/wan22_t2v_api.json"
-    elif end_image_path_local:
-        workflow_file = "/new_Wan22_flf2v_api.json"
-    else:
-        workflow_file = "/new_Wan22_api.json"
+    # 워크플로우 파일 선택 (Sadece T2V)
+    workflow_file = "/wan22_t2v_api.json"
         
-    logger.info(f"Using {'T2V' if is_t2v else ('FLF2V' if end_image_path_local else 'I2V')} workflow with {lora_count} LoRA pairs")
+    logger.info(f"Using T2V workflow with {lora_count} LoRA pairs")
     
     prompt = load_workflow(workflow_file)
     
@@ -211,12 +181,10 @@ def handler(job):
         prompt["220"]["inputs"]["seed"] = seed
     if "540" in prompt:
         prompt["540"]["inputs"]["seed"] = seed
-        # T2V'de CFG Scheduler kullanılıyor olabilir, kontrol et
+        # T2V'de CFG Scheduler kullanılıyor
         if "570" in prompt:
              prompt["570"]["inputs"]["cfg_scale_start"] = cfg
              prompt["570"]["inputs"]["cfg_scale_end"] = cfg
-        else:
-             prompt["540"]["inputs"]["cfg"] = cfg
 
     # Çözünürlük ayarları
     original_width = job_input.get("width", 480)
@@ -227,12 +195,9 @@ def handler(job):
     if "235" in prompt: prompt["235"]["inputs"]["value"] = adjusted_width
     if "236" in prompt: prompt["236"]["inputs"]["value"] = adjusted_height
 
-    # Kare sayısı ve context ayarları
+    # Kare sayısı ve context ayarları (T2V 노드 541)
     if "541" in prompt:
         prompt["541"]["inputs"]["num_frames"] = length
-        # I2V modunda görsel yolunu set et
-        if not is_t2v:
-            prompt["244"]["inputs"]["image"] = image_path
             
     if "498" in prompt:
         prompt["498"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
@@ -241,17 +206,6 @@ def handler(job):
     # Step ayarları
     if "569" in prompt:
         prompt["569"]["inputs"]["value"] = steps
-    
-    # Geleneksel step ayarı (varsa)
-    if "834" in prompt:
-        prompt["834"]["inputs"]["steps"] = steps
-        lowsteps = int(steps*0.6)
-        if "829" in prompt:
-            prompt["829"]["inputs"]["step"] = lowsteps
-
-    # 엔드 이미지가 있는 경우 (FLF2V)
-    if end_image_path_local and "617" in prompt:
-        prompt["617"]["inputs"]["image"] = end_image_path_local
     
     # LoRA 설정 적용
     if lora_count > 0:

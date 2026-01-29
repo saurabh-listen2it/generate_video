@@ -12,20 +12,6 @@
         "cfg": 2.0
       },
       "timeout": 600000
-    },
-    {
-      "name": "Image to Video Test",
-      "input": {
-        "prompt": "Make the cat jump",
-        "image_url": "https://raw.githubusercontent.com/wlsdml1114/generate_video/main/example_image.png",
-        "width": 480,
-        "height": 832,
-        "length": 81,
-        "steps": 10,
-        "seed": 42,
-        "cfg": 2.0
-      },
-      "timeout": 600000
     }
   ],
   "config": {
