@@ -5,11 +5,12 @@ set -e
 
 # Start ComfyUI in the background
 echo "Starting ComfyUI in the background..."
-python /ComfyUI/main.py --listen --use-sage-attention &
+# --lowvram ve --preview-method auto ekleyerek bellek kullanımını optimize ediyoruz
+python /ComfyUI/main.py --listen --use-sage-attention --lowvram --preview-method auto > /tmp/comfyui.log 2>&1 &
 
 # Wait for ComfyUI to be ready
-echo "Waiting for ComfyUI to be ready..."
-max_wait=120  # 최대 2분 대기
+echo "Waiting for ComfyUI to be ready (Max 10 minutes)..."
+max_wait=600  # Modeller büyük olduğu için 10 dakikaya çıkardık
 wait_count=0
 while [ $wait_count -lt $max_wait ]; do
     if curl -s http://127.0.0.1:8188/ > /dev/null 2>&1; then
@@ -17,16 +18,19 @@ while [ $wait_count -lt $max_wait ]; do
         break
     fi
     echo "Waiting for ComfyUI... ($wait_count/$max_wait)"
-    sleep 2
-    wait_count=$((wait_count + 2))
+    # Log dosyasının son satırını göstererek ne olduğunu anlayalım
+    tail -n 1 /tmp/comfyui.log || true
+    sleep 5
+    wait_count=$((wait_count + 5))
 done
 
 if [ $wait_count -ge $max_wait ]; then
     echo "Error: ComfyUI failed to start within $max_wait seconds"
+    echo "--- Last ComfyUI Logs ---"
+    cat /tmp/comfyui.log
     exit 1
 fi
 
 # Start the handler in the foreground
-# 이 스크립트가 컨테이너의 메인 프로세스가 됩니다.
 echo "Starting the handler..."
-exec python handler.py
+exec python -u handler.py
