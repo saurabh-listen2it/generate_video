@@ -278,6 +278,66 @@ class GenerateVideoClient:
         
         result = self.wait_for_completion(job_id)
         return result
+
+    def create_video_from_prompt(
+        self,
+        prompt: str,
+        negative_prompt: Optional[str] = None,
+        width: int = 480,
+        height: int = 832,
+        length: int = 81,
+        steps: int = 10,
+        seed: int = 42,
+        cfg: float = 2.0,
+        context_overlap: int = 48,
+        lora_pairs: Optional[List[Dict[str, Any]]] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate video from prompt (Text-to-Video)
+        
+        Args:
+            prompt: Prompt text
+            negative_prompt: Negative prompt to exclude unwanted elements
+            width: Output width
+            height: Output height
+            length: Number of frames
+            steps: Number of steps
+            seed: Seed value
+            cfg: CFG scale
+            context_overlap: Context overlap
+            lora_pairs: LoRA settings list (max 4)
+        
+        Returns:
+            Job result dictionary
+        """
+        # Process LoRA settings
+        if lora_pairs is None:
+            lora_pairs = []
+        
+        # Configure API input data
+        input_data = {
+            "prompt": prompt,
+            "width": width,
+            "height": height,
+            "length": length,
+            "steps": steps,
+            "seed": seed,
+            "cfg": cfg,
+            "context_overlap": context_overlap,
+            "lora_pairs": lora_pairs
+        }
+        
+        # Add negative_prompt if provided
+        if negative_prompt:
+            input_data["negative_prompt"] = negative_prompt
+        
+        # Submit job and wait
+        job_id = self.submit_job(input_data)
+        if not job_id:
+            return {"error": "Job submission failed"}
+        
+        result = self.wait_for_completion(job_id)
+        return result
     
     def batch_process_images(
         self,
