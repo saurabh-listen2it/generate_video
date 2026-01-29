@@ -272,15 +272,20 @@
         0
       ],
       "num_frames": 81,
+      "noise_aug_strength": 0,
+      "start_latent_strength": 1,
+      "end_latent_strength": 1,
       "force_offload": true,
+      "fun_or_fl2v_model": false,
+      "tiled_vae": false,
       "vae": [
         "129",
         0
       ]
     },
-    "class_type": "WanVideoTextToVideoEncode",
+    "class_type": "WanVideoImageToVideoEncode",
     "_meta": {
-      "title": "WanVideo TextToVideo Encode"
+      "title": "WanVideo ImageToVideo Encode (T2V Mode)"
     }
   },
   "549": {
