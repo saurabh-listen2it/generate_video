@@ -201,7 +201,7 @@ def handler(job):
     if "37" in prompt: 
         prompt["37"]["inputs"]["width"] = adjusted_width
         prompt["37"]["inputs"]["height"] = adjusted_height
-        prompt["37"]["inputs"]["length"] = length
+        prompt["37"]["inputs"]["num_frames"] = length
             
     # Context Options (Node 40)
     if "40" in prompt:
