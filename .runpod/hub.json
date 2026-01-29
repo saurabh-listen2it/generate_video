@@ -8,7 +8,7 @@
     "handlerPath": "handler.py",
     "config": {
       "runsOn": "GPU",
-      "containerDiskInGb": 120,
+      "containerDiskInGb": 100,
       "gpuCount": 1,
       "gpuIds": "ADA_24,ADA_32_PRO,BLACKWELL_PRO",
       "allowedCudaVersions": [
