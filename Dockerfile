@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
 RUN pip install -U "huggingface_hub[hf_transfer]"
 RUN pip install runpod websocket-client
 
+# SAGE ATTENTION ve diğer kritik kütüphaneleri build aşamasında kuruyoruz
+# Bu sayede runtime'da vakit kaybetmiyoruz
+RUN pip install sageattention accelerate diffusers transformers
+
 WORKDIR /
 
 # ComfyUI kurulumu
@@ -33,7 +37,7 @@ RUN cd /ComfyUI/custom_nodes && \
     git clone https://github.com/eddyhhlure1Eddy/auto_wan2.2animate_freamtowindow_server && \
     git clone https://github.com/eddyhhlure1Eddy/ComfyUI-AdaptiveWindowSize
 
-# Gereksinimleri kur
+# Custom node gereksinimlerini build'de kuruyoruz
 RUN cd /ComfyUI/custom_nodes/ComfyUI-Manager && pip install -r requirements.txt && \
     cd /ComfyUI/custom_nodes/ComfyUI-GGUF && pip install -r requirements.txt && \
     cd /ComfyUI/custom_nodes/ComfyUI-KJNodes && pip install -r requirements.txt && \
