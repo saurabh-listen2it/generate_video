@@ -15,7 +15,7 @@ RUN pip install runpod websocket-client
 
 # SAGE ATTENTION ve diğer kritik kütüphaneleri build aşamasında kuruyoruz
 # Bu sayede runtime'da vakit kaybetmiyoruz
-RUN pip install sageattention accelerate diffusers transformers
+RUN pip install sageattention accelerate diffusers transformers sentencepiece protobuf
 
 WORKDIR /
 
