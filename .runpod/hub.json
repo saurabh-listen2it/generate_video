@@ -10,7 +10,7 @@
       "runsOn": "GPU",
       "containerDiskInGb": 100,
       "gpuCount": 1,
-      "gpuIds": "ADA_24,RTX 6000 Ada",
+      "gpuIds": "ADA_24,AMPERE_24,AMPERE_48,ADA_48_PRO",
       "allowedCudaVersions": [
         "12.1",
         "12.2",
