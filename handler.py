@@ -227,12 +227,12 @@ def handler(job):
                 lora_low_weight = lora_pair.get("low_weight", 1.0)
                 
                 if lora_high and high_lora_node_id in prompt:
-                    prompt[high_lora_node_id]["inputs"][f"lora_{i+1}"] = lora_high
-                    prompt[high_lora_node_id]["inputs"][f"strength_{i+1}"] = lora_high_weight
+                    prompt[high_lora_node_id]["inputs"][f"lora_{i}"] = lora_high
+                    prompt[high_lora_node_id]["inputs"][f"strength_{i}"] = lora_high_weight
                 
                 if lora_low and low_lora_node_id in prompt:
-                    prompt[low_lora_node_id]["inputs"][f"lora_{i+1}"] = lora_low
-                    prompt[low_lora_node_id]["inputs"][f"strength_{i+1}"] = lora_low_weight
+                    prompt[low_lora_node_id]["inputs"][f"lora_{i}"] = lora_low
+                    prompt[low_lora_node_id]["inputs"][f"strength_{i}"] = lora_low_weight
 
     ws_url = f"ws://{server_address}:8188/ws?clientId={client_id}"
     logger.info(f"Connecting to WebSocket: {ws_url}")
