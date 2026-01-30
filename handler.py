@@ -291,25 +291,26 @@ def handler(job):
         # RIFE multiplier ayarı
         if "90" in prompt:
             prompt["90"]["inputs"]["multiplier"] = multiplier
-            logger.info(f"Interpolation aktif: {multiplier}x")
+            logger.info(f"DEBUG: RIFE (Node 90) multiplier set to {multiplier}")
         
         # Upscale ayarı
         if "92" in prompt:
             upscale_by = job_input.get("upscale", 2)
             prompt["92"]["inputs"]["upscale_by"] = upscale_by
-            logger.info(f"Upscale aktif: {upscale_by}x")
+            logger.info(f"DEBUG: Upscale (Node 92) factor set to {upscale_by}")
         
         # Final FPS hesaplama (Orijinal FPS * Çarpan)
         final_fps = fps * multiplier
         prompt["88"]["inputs"]["fps"] = final_fps
-        logger.info(f"Final Video FPS: {final_fps}")
+        logger.info(f"DEBUG: Final Video FPS: {final_fps} (Base: {fps} x Multiplier: {multiplier})")
     
-    logger.info("Workflow güncellendi, çalıştırılıyor...")
+    logger.info(">>> Workflow update completed. Injecting into ComfyUI... <<<")
     
     try:
         # Workflow'u çalıştır
+        logger.info(">>> Execution started! Tracking progress via WebSocket... <<<")
         result = execute_workflow(prompt)
-        logger.info("Video başarıyla oluşturuldu")
+        logger.info(">>> Video generation and post-processing successful! <<<")
         return result
         
     except Exception as e:
