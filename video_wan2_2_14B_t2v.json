@@ -251,13 +251,39 @@
       "ensemble": false,
       "scale_factor": 1,
       "frames": [
-        "87",
+        "92",
         0
       ]
     },
     "class_type": "RIFE_VFI",
     "_meta": {
       "title": "RIFE VFI (Akıcılık Artırıcı)"
+    }
+  },
+  "91": {
+    "inputs": {
+      "upscale_model": "4x-UltraSharp.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Upscale Modeli Yükle"
+    }
+  },
+  "92": {
+    "inputs": {
+      "upscale_by": 2,
+      "upscale_model": [
+        "91",
+        0
+      ],
+      "image": [
+        "87",
+        0
+      ]
+    },
+    "class_type": "UpscaleImageByModel",
+    "_meta": {
+      "title": "Görüntü Ölçekle (Model ile)"
     }
   }
 }

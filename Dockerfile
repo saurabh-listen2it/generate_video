@@ -42,6 +42,12 @@ RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirem
     cd /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation && pip install -r requirements.txt
 
 # Model dosyalarını indir (aria2c ile hızlı çoklu bağlantı)
+# Upscale modelini indir
+RUN mkdir -p /ComfyUI/models/upscale_models && \
+    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
+    -d /ComfyUI/models/upscale_models -o 4x-UltraSharp.pth \
+    "https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth"
+
 # RIFE v4.25 modelini indir (Frame Interpolation için)
 RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife && \
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \

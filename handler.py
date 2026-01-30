@@ -293,6 +293,12 @@ def handler(job):
             prompt["90"]["inputs"]["multiplier"] = multiplier
             logger.info(f"Interpolation aktif: {multiplier}x")
         
+        # Upscale ayarı
+        if "92" in prompt:
+            upscale_by = job_input.get("upscale", 2)
+            prompt["92"]["inputs"]["upscale_by"] = upscale_by
+            logger.info(f"Upscale aktif: {upscale_by}x")
+        
         # Final FPS hesaplama (Orijinal FPS * Çarpan)
         final_fps = fps * multiplier
         prompt["88"]["inputs"]["fps"] = final_fps
