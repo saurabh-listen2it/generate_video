@@ -244,14 +244,14 @@
   },
   "90": {
     "inputs": {
-      "ckpt_name": "rife425.pth",
+      "ckpt_name": "rife47.pth",
       "clear_cache_after_n_frames": 10,
       "multiplier": 2,
       "fast_mode": true,
       "ensemble": false,
       "scale_factor": 1,
       "frames": [
-        "92",
+        "93",
         0
       ]
     },
@@ -271,7 +271,6 @@
   },
   "92": {
     "inputs": {
-      "upscale_by": 2,
       "upscale_model": [
         "91",
         0
@@ -281,9 +280,23 @@
         0
       ]
     },
-    "class_type": "UpscaleImageByModel",
+    "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Görüntü Ölçekle (Model ile)"
+    }
+  },
+  "93": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "upscale_by": 0.5,
+      "image": [
+        "92",
+        0
+      ]
+    },
+    "class_type": "ImageScaleBy",
+    "_meta": {
+      "title": "Görüntü Ölçekle (Çarpan ile)"
     }
   }
 }
