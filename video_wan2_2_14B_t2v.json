@@ -218,9 +218,9 @@
   },
   "88": {
     "inputs": {
-      "fps": 16,
+      "fps": 32,
       "images": [
-        "87",
+        "90",
         0
       ]
     },
@@ -240,6 +240,24 @@
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "90": {
+    "inputs": {
+      "ckpt_name": "rife425.pth",
+      "clear_cache_after_n_frames": 10,
+      "multiplier": 2,
+      "fast_mode": true,
+      "ensemble": false,
+      "scale_factor": 1,
+      "frames": [
+        "87",
+        0
+      ]
+    },
+    "class_type": "RIFE_VFI",
+    "_meta": {
+      "title": "RIFE VFI (Akıcılık Artırıcı)"
     }
   }
 }

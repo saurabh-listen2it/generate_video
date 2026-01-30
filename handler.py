@@ -286,7 +286,17 @@ def handler(job):
     # Node 88: CreateVideo (FPS ayarı)
     if "88" in prompt:
         fps = job_input.get("fps", 16)
-        prompt["88"]["inputs"]["fps"] = fps
+        multiplier = job_input.get("multiplier", 2)
+        
+        # RIFE multiplier ayarı
+        if "90" in prompt:
+            prompt["90"]["inputs"]["multiplier"] = multiplier
+            logger.info(f"Interpolation aktif: {multiplier}x")
+        
+        # Final FPS hesaplama (Orijinal FPS * Çarpan)
+        final_fps = fps * multiplier
+        prompt["88"]["inputs"]["fps"] = final_fps
+        logger.info(f"Final Video FPS: {final_fps}")
     
     logger.info("Workflow güncellendi, çalıştırılıyor...")
     

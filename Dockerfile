@@ -31,16 +31,23 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
     git checkout master && \
     pip install -r requirements.txt
 
-# Gerekli custom nodes (minimal set)
+# Gerekli custom nodes
 RUN cd /ComfyUI/custom_nodes && \
     git clone https://github.com/Comfy-Org/ComfyUI-Manager.git && \
-    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git && \
+    git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation.git
 
-# VideoHelperSuite bağımlılıkları
-RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && \
-    pip install -r requirements.txt
+# VideoHelperSuite ve Interpolation bağımlılıkları
+RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirements.txt && \
+    cd /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation && pip install -r requirements.txt
 
 # Model dosyalarını indir (aria2c ile hızlı çoklu bağlantı)
+# RIFE v4.25 modelini indir (Frame Interpolation için)
+RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife && \
+    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
+    -d /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife -o rife425.pth \
+    "https://huggingface.co/Fannovel16/rife_ncnn_vulkan_python/resolve/main/rife425.pth"
+
 # Diffusion models (Wan2.2 T2V)
 RUN mkdir -p /ComfyUI/models/unet/Wan2.2 && \
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
