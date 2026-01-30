@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to RunPod
+name: Build and Push Docker Image to Docker Hub
 
 on:
   push:
@@ -7,15 +7,11 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: registry.runpod.net
-  IMAGE_NAME: kedimuzafer-generate-video-main-dockerfile
+  IMAGE_NAME: kedimuzafer/wan-video-gen
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout repository
@@ -24,22 +20,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to RunPod Registry
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.RUNPOD_USERNAME }}
-          password: ${{ secrets.RUNPOD_API_KEY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix={{branch}}-
             type=raw,value=latest
-            type=raw,value={{sha}}
+            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
