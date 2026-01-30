@@ -44,13 +44,20 @@ RUN cd /ComfyUI/custom_nodes/ComfyUI-Manager && pip install -r requirements.txt 
     cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirements.txt && \
     cd /ComfyUI/custom_nodes/ComfyUI-WanVideoWrapper && pip install -r requirements.txt
 
-# Wan2.2 T2V Modelleri
-RUN wget -q https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors -O /ComfyUI/models/diffusion_models/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors
-RUN wget -q https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors -O /ComfyUI/models/diffusion_models/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors
+# Wan2.2 T2V Modelleri (huggingface-cli ile güvenli indirme)
+RUN huggingface-cli download Kijai/WanVideo_comfy_fp8_scaled T2V/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors --local-dir /ComfyUI/models/diffusion_models --local-dir-use-symlinks False
+RUN huggingface-cli download Kijai/WanVideo_comfy_fp8_scaled T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors --local-dir /ComfyUI/models/diffusion_models --local-dir-use-symlinks False
 
-RUN wget -q https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors -O /ComfyUI/models/clip_vision/clip_vision_h.safetensors
-RUN wget -q https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors -O /ComfyUI/models/text_encoders/umt5-xxl-enc-bf16.safetensors
-RUN wget -q https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors -O /ComfyUI/models/vae/Wan2_1_VAE_bf16.safetensors
+# Diğer modeller (huggingface-cli ile)
+RUN huggingface-cli download Comfy-Org/Wan_2.1_ComfyUI_repackaged split_files/clip_vision/clip_vision_h.safetensors --local-dir /ComfyUI/models/clip_vision --local-dir-use-symlinks False
+RUN huggingface-cli download Kijai/WanVideo_comfy umt5-xxl-enc-bf16.safetensors --local-dir /ComfyUI/models/text_encoders --local-dir-use-symlinks False
+RUN huggingface-cli download Kijai/WanVideo_comfy Wan2_1_VAE_bf16.safetensors --local-dir /ComfyUI/models/vae --local-dir-use-symlinks False
+
+# Dosyaları doğru yerlere taşı (HuggingFace klasör yapısını düzeltmek için)
+# T2V Modelleri T2V klasöründen ana dizine
+RUN mv /ComfyUI/models/diffusion_models/T2V/* /ComfyUI/models/diffusion_models/ && rmdir /ComfyUI/models/diffusion_models/T2V
+# Clip Vision split_files klasöründen ana dizine
+RUN mv /ComfyUI/models/clip_vision/split_files/clip_vision/* /ComfyUI/models/clip_vision/ && rm -rf /ComfyUI/models/clip_vision/split_files
 
 COPY . .
 COPY extra_model_paths.yaml /ComfyUI/extra_model_paths.yaml
