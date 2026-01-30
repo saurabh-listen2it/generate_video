@@ -150,29 +150,54 @@ def execute_workflow(prompt):
     ws = websocket.WebSocket()
     
     try:
-        ws.connect(ws_url, timeout=30)
-        logger.info("WebSocket bağlantısı kuruldu")
+        # Timeout'u 10 dakikaya çıkarıyoruz (Model yükleme ve ilk adım için)
+        ws.connect(ws_url, timeout=600)
+        logger.info("WebSocket bağlantısı kuruldu, execution takibi başlıyor...")
         
         while True:
-            msg = ws.recv()
+            try:
+                msg = ws.recv()
+                if not msg:
+                    break
+            except websocket.WebSocketTimeoutException:
+                logger.warning("WebSocket recv timeout - hala bekleniyor...")
+                continue
+                
             if isinstance(msg, str):
                 data = json.loads(msg)
                 msg_type = data.get('type', '')
                 
-                if msg_type == 'executing':
+                if msg_type == 'status':
+                    status = data.get('data', {}).get('status', {})
+                    queue_remaining = status.get('exec_info', {}).get('queue_remaining', 0)
+                    if queue_remaining > 0:
+                        logger.info(f"Sırada bekleyen iş var: {queue_remaining}")
+
+                elif msg_type == 'executing':
                     exec_data = data.get('data', {})
                     node = exec_data.get('node')
                     current_id = exec_data.get('prompt_id')
                     
-                    if current_id == prompt_id and node is None:
-                        logger.info("Workflow tamamlandı")
-                        break
+                    if current_id == prompt_id:
+                        if node is None:
+                            logger.info("Workflow tamamlandı")
+                            break
+                        else:
+                            logger.info(f"Şu an çalışan node: {node}")
+                
+                elif msg_type == 'progress':
+                    progress_data = data.get('data', {})
+                    current = progress_data.get('value')
+                    total = progress_data.get('max')
+                    logger.info(f"İlerleme: {current}/{total}")
                         
                 elif msg_type == 'execution_error':
                     error_data = data.get('data', {})
                     logger.error(f"Execution hatası: {error_data}")
                     raise Exception(f"Workflow hatası: {error_data}")
-                    
+    except Exception as e:
+        logger.error(f"WebSocket döngüsünde hata: {e}")
+        raise
     finally:
         ws.close()
     
