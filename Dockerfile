@@ -21,7 +21,9 @@ RUN pip install --no-cache-dir \
     diffusers \
     transformers \
     sentencepiece \
-    protobuf
+    protobuf \
+    spandrel \
+    spandrel_extra_arches
 
 WORKDIR /
 
