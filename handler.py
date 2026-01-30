@@ -138,15 +138,31 @@ def get_videos(ws, prompt):
             continue
 
     history = get_history(prompt_id)[prompt_id]
+    logger.info(f"📋 History output nodes: {list(history['outputs'].keys())}")
+    logger.info(f"📋 Full history structure: {json.dumps({k: list(v.keys()) for k, v in history['outputs'].items()}, indent=2)}")
+
     for node_id in history['outputs']:
         node_output = history['outputs'][node_id]
+        logger.info(f"🔍 Node {node_id} output keys: {list(node_output.keys())}")
+        logger.info(f"🔍 Node {node_id} full output (first 500 chars): {str(node_output)[:500]}")
         videos_output = []
+
+        # VHS_VideoCombine uses 'gifs' key
         if 'gifs' in node_output:
+            logger.info(f"✅ Node {node_id} has 'gifs' key with {len(node_output['gifs'])} items")
             for video in node_output['gifs']:
+                logger.info(f"✅ Found video: {video.get('filename', 'unknown')} at {video.get('fullpath', 'no path')}")
                 # fullpath를 이용하여 직접 파일을 읽고 base64로 인코딩
-                with open(video['fullpath'], 'rb') as f:
-                    video_data = base64.b64encode(f.read()).decode('utf-8')
-                videos_output.append(video_data)
+                try:
+                    with open(video['fullpath'], 'rb') as f:
+                        video_data = base64.b64encode(f.read()).decode('utf-8')
+                    videos_output.append(video_data)
+                    logger.info(f"✅ Successfully encoded video (size: {len(video_data)} chars)")
+                except Exception as e:
+                    logger.error(f"❌ Failed to read video file: {e}")
+        else:
+            logger.warning(f"⚠️  Node {node_id} does NOT have 'gifs' key!")
+
         output_videos[node_id] = videos_output
 
     return output_videos
@@ -247,11 +263,17 @@ def handler(job):
     videos = get_videos(ws, prompt)
     ws.close()
 
+    logger.info(f"📦 Total output nodes: {len(videos)}")
+    for node_id, video_list in videos.items():
+        logger.info(f"  - Node {node_id}: {len(video_list)} videos")
+
     # 이미지가 없는 경우 처리
     for node_id in videos:
         if videos[node_id]:
+            logger.info(f"✅ Returning video from node {node_id}")
             return {"video": videos[node_id][0]}
-    
-    return {"error": "비디오를를 찾을 수 없습니다."}
+
+    logger.error("❌ No videos found in any output node!")
+    return {"error": "비디오를를 찾을 수 없습니다.", "debug_nodes": list(videos.keys())}
 
 runpod.serverless.start({"handler": handler})
