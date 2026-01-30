@@ -216,7 +216,7 @@ def handler(job):
         low_lora_node_id = "62"
         
         for i, lora_pair in enumerate(lora_pairs):
-            if i < 4:
+            if i < 5:  # WanVideoLoraSelectMulti supports 5 LoRAs (lora_0 to lora_4)
                 lora_high = lora_pair.get("high")
                 lora_low = lora_pair.get("low")
                 lora_high_weight = lora_pair.get("high_weight", 1.0)
