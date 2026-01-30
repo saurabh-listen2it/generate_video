@@ -147,21 +147,36 @@ def get_videos(ws, prompt):
         logger.info(f"🔍 Node {node_id} full output (first 500 chars): {str(node_output)[:500]}")
         videos_output = []
 
-        # VHS_VideoCombine uses 'gifs' key
-        if 'gifs' in node_output:
-            logger.info(f"✅ Node {node_id} has 'gifs' key with {len(node_output['gifs'])} items")
-            for video in node_output['gifs']:
-                logger.info(f"✅ Found video: {video.get('filename', 'unknown')} at {video.get('fullpath', 'no path')}")
-                # fullpath를 이용하여 직접 파일을 읽고 base64로 인코딩
-                try:
-                    with open(video['fullpath'], 'rb') as f:
-                        video_data = base64.b64encode(f.read()).decode('utf-8')
-                    videos_output.append(video_data)
-                    logger.info(f"✅ Successfully encoded video (size: {len(video_data)} chars)")
-                except Exception as e:
-                    logger.error(f"❌ Failed to read video file: {e}")
-        else:
-            logger.warning(f"⚠️  Node {node_id} does NOT have 'gifs' key!")
+        # Try multiple possible output formats
+        # SaveVideo (Native ComfyUI) may use 'videos', 'filenames', or other keys
+        video_keys = ['gifs', 'videos', 'filenames', 'results']
+
+        for key in video_keys:
+            if key in node_output:
+                logger.info(f"✅ Node {node_id} has '{key}' key with {len(node_output[key])} items")
+                for video_item in node_output[key]:
+                    # Handle different formats
+                    if isinstance(video_item, dict):
+                        video_path = video_item.get('fullpath') or video_item.get('filename') or video_item.get('path')
+                    elif isinstance(video_item, str):
+                        video_path = video_item
+                    else:
+                        logger.warning(f"⚠️  Unknown video item type: {type(video_item)}")
+                        continue
+
+                    if video_path:
+                        logger.info(f"✅ Found video at: {video_path}")
+                        try:
+                            with open(video_path, 'rb') as f:
+                                video_data = base64.b64encode(f.read()).decode('utf-8')
+                            videos_output.append(video_data)
+                            logger.info(f"✅ Successfully encoded video (size: {len(video_data)} chars)")
+                        except Exception as e:
+                            logger.error(f"❌ Failed to read video file {video_path}: {e}")
+                break  # Found videos, stop looking
+
+        if not videos_output:
+            logger.warning(f"⚠️  Node {node_id} has no recognizable video output!")
 
         output_videos[node_id] = videos_output
 
@@ -181,10 +196,10 @@ def handler(job):
     is_t2v = True
     logger.info("Sadece Text-to-Video modu aktif. Görsel girişleri yoksayılıyor.")
 
-    # 워크플로우 파일 선택 (Sadece T2V)
-    workflow_file = "/wan22_t2v_api.json"
+    # 워크플로우 파일 선택 (Native ComfyUI workflow)
+    workflow_file = "/wan22_t2v_working.json"
 
-    logger.info("Using T2V workflow (LoRA support temporarily disabled)")
+    logger.info("Using Native ComfyUI T2V workflow (tested and working)")
     
     prompt = load_workflow(workflow_file)
     
@@ -193,37 +208,40 @@ def handler(job):
     seed = job_input.get("seed", 42)
     cfg = job_input.get("cfg", 2.0)
 
-    # Ortak parametreleri uygula (Node 16: Text Encode)
-    prompt["16"]["inputs"]["positive_prompt"] = job_input["prompt"]
-    prompt["16"]["inputs"]["negative_prompt"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
+    # Text Encode (Native ComfyUI nodes)
+    # Node 89: Positive prompt (CLIPTextEncode)
+    # Node 72: Negative prompt (CLIPTextEncode)
+    prompt["89"]["inputs"]["text"] = job_input["prompt"]
+    prompt["72"]["inputs"]["text"] = job_input.get("negative_prompt", "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走，裸露，NSFW")
     
-    # Sampler seed/cfg ayarları (Node 27: HIGH, Node 54: LOW)
-    if "27" in prompt:
-        prompt["27"]["inputs"]["seed"] = seed
-        prompt["27"]["inputs"]["cfg"] = cfg
-        # Steps ayarı (HIGH için oranlanabilir ama şimdilik sabit)
-        prompt["27"]["inputs"]["steps"] = steps
-        
-    if "54" in prompt:
-        prompt["54"]["inputs"]["seed"] = seed
-        prompt["54"]["inputs"]["cfg"] = cfg
-        prompt["54"]["inputs"]["steps"] = steps
+    # KSampler settings (Native ComfyUI)
+    # Node 81: HIGH noise sampler (steps 0-2)
+    # Node 78: LOW noise sampler (steps 2-4)
+    total_steps = job_input.get("steps", 4)  # Default 4 steps
 
-    # Çözünürlük ve Kare Sayısı (Node 37: WanVideoEmptyEmbeds)
-    original_width = job_input.get("width", 480)
-    original_height = job_input.get("height", 832)
+    if "81" in prompt:
+        prompt["81"]["inputs"]["noise_seed"] = seed
+        prompt["81"]["inputs"]["cfg"] = cfg
+        prompt["81"]["inputs"]["steps"] = total_steps
+        prompt["81"]["inputs"]["end_at_step"] = total_steps // 2  # First half
+
+    if "78" in prompt:
+        prompt["78"]["inputs"]["noise_seed"] = 0  # LOW sampler uses seed 0
+        prompt["78"]["inputs"]["cfg"] = cfg
+        prompt["78"]["inputs"]["steps"] = total_steps
+        prompt["78"]["inputs"]["start_at_step"] = total_steps // 2  # Second half
+        prompt["78"]["inputs"]["end_at_step"] = total_steps
+
+    # Resolution and Frame Count (Node 74: EmptyHunyuanLatentVideo)
+    original_width = job_input.get("width", 640)
+    original_height = job_input.get("height", 640)
     adjusted_width = to_nearest_multiple_of_16(original_width)
     adjusted_height = to_nearest_multiple_of_16(original_height)
-    
-    if "37" in prompt: 
-        prompt["37"]["inputs"]["width"] = adjusted_width
-        prompt["37"]["inputs"]["height"] = adjusted_height
-        prompt["37"]["inputs"]["num_frames"] = length
-            
-    # Context Options (Node 40)
-    if "40" in prompt:
-        prompt["40"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
-        prompt["40"]["inputs"]["context_frames"] = length
+
+    if "74" in prompt:
+        prompt["74"]["inputs"]["width"] = adjusted_width
+        prompt["74"]["inputs"]["height"] = adjusted_height
+        prompt["74"]["inputs"]["length"] = length
 
     ws_url = f"ws://{server_address}:8188/ws?clientId={client_id}"
     logger.info(f"Connecting to WebSocket: {ws_url}")
