@@ -13,7 +13,7 @@ python /ComfyUI/main.py \
     --listen 0.0.0.0 \
     --port 8188 \
     --use-sage-attention \
-    --lowvram \
+    --normalvram \
     --preview-method auto \
     > "$LOG_FILE" 2>&1 &
 
