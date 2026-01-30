@@ -165,16 +165,10 @@ def handler(job):
     is_t2v = True
     logger.info("Sadece Text-to-Video modu aktif. Görsel girişleri yoksayılıyor.")
 
-    # LoRA 설정 확인 - 배열로 받아서 처리
-    lora_pairs = job_input.get("lora_pairs", [])
-    
-    # 최대 4개 LoRA까지 지원
-    lora_count = min(len(lora_pairs), 4)
-    
     # 워크플로우 파일 선택 (Sadece T2V)
     workflow_file = "/wan22_t2v_api.json"
-        
-    logger.info(f"Using T2V workflow with {lora_count} LoRA pairs")
+
+    logger.info("Using T2V workflow (LoRA support temporarily disabled)")
     
     prompt = load_workflow(workflow_file)
     
@@ -214,26 +208,6 @@ def handler(job):
     if "40" in prompt:
         prompt["40"]["inputs"]["context_overlap"] = job_input.get("context_overlap", 48)
         prompt["40"]["inputs"]["context_frames"] = length
-    
-    # LoRA 설정 적용 (Node 60: HIGH, Node 62: LOW)
-    if lora_count > 0:
-        high_lora_node_id = "60"
-        low_lora_node_id = "62"
-        
-        for i, lora_pair in enumerate(lora_pairs):
-            if i < 5:  # WanVideoLoraSelectMulti supports 5 LoRAs (lora_0 to lora_4)
-                lora_high = lora_pair.get("high")
-                lora_low = lora_pair.get("low")
-                lora_high_weight = lora_pair.get("high_weight", 1.0)
-                lora_low_weight = lora_pair.get("low_weight", 1.0)
-                
-                if lora_high and high_lora_node_id in prompt:
-                    prompt[high_lora_node_id]["inputs"][f"lora_{i}"] = lora_high
-                    prompt[high_lora_node_id]["inputs"][f"strength_{i}"] = lora_high_weight
-                
-                if lora_low and low_lora_node_id in prompt:
-                    prompt[low_lora_node_id]["inputs"][f"lora_{i}"] = lora_low
-                    prompt[low_lora_node_id]["inputs"][f"strength_{i}"] = lora_low_weight
 
     ws_url = f"ws://{server_address}:8188/ws?clientId={client_id}"
     logger.info(f"Connecting to WebSocket: {ws_url}")

@@ -244,53 +244,5 @@
     "_meta": {
       "title": "WanVideo Set BlockSwap (HIGH)"
     }
-  },
-  "60": {
-    "inputs": {
-      "lora_0": "none",
-      "strength_0": 1.0,
-      "lora_1": "none",
-      "strength_1": 1.0,
-      "lora_2": "none",
-      "strength_2": 1.0,
-      "lora_3": "none",
-      "strength_3": 1.0,
-      "lora_4": "none",
-      "strength_4": 1.0,
-      "low_mem_load": false,
-      "merge_loras": false,
-      "model": [
-        "58",
-        0
-      ]
-    },
-    "class_type": "WanVideoLoraSelectMulti",
-    "_meta": {
-      "title": "WanVideo Lora Select Multi (HIGH)"
-    }
-  },
-  "62": {
-    "inputs": {
-      "lora_0": "none",
-      "strength_0": 1.0,
-      "lora_1": "none",
-      "strength_1": 1.0,
-      "lora_2": "none",
-      "strength_2": 1.0,
-      "lora_3": "none",
-      "strength_3": 1.0,
-      "lora_4": "none",
-      "strength_4": 1.0,
-      "low_mem_load": false,
-      "merge_loras": false,
-      "model": [
-        "55",
-        0
-      ]
-    },
-    "class_type": "WanVideoLoraSelectMulti",
-    "_meta": {
-      "title": "WanVideo Lora Select Multi (LOW)"
-    }
   }
 }
