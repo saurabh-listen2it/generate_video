@@ -202,16 +202,15 @@ def handler(job):
     logger.info("Using Native ComfyUI T2V workflow (tested and working)")
     
     prompt = load_workflow(workflow_file)
-    
+
     length = job_input.get("length", 81)
-    steps = job_input.get("steps", 10)
     seed = job_input.get("seed", 42)
-    cfg = job_input.get("cfg", 2.0)
+    cfg = job_input.get("cfg", 1.0)  # Native workflow uses CFG=1
 
     # Text Encode (Native ComfyUI nodes)
     # Node 89: Positive prompt (CLIPTextEncode)
     # Node 72: Negative prompt (CLIPTextEncode)
-    prompt["89"]["inputs"]["text"] = job_input["prompt"]
+    prompt["89"]["inputs"]["text"] = job_input.get("prompt", "")
     prompt["72"]["inputs"]["text"] = job_input.get("negative_prompt", "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走，裸露，NSFW")
     
     # KSampler settings (Native ComfyUI)
