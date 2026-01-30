@@ -73,42 +73,65 @@ def get_history(prompt_id):
 
 def get_video_file(node_output):
     """Video dosyasını bul ve oku"""
+    logger.info(f"get_video_file çağrıldı, node_output keys: {list(node_output.keys())}")
+
     # SaveVideo node output formatını kontrol et (ComfyUI 'gifs' key kullanıyor)
     for key in ['gifs', 'videos', 'files']:
         if key in node_output:
+            logger.info(f"'{key}' key'i bulundu, içerik: {node_output[key]}")
             for item in node_output[key]:
                 if isinstance(item, dict):
                     filename = item.get('filename', '')
                     subfolder = item.get('subfolder', '')
                     type_ = item.get('type', '')
-                    
+
+                    logger.info(f"Dict item - filename: {filename}, subfolder: {subfolder}, type: {type_}")
+
                     # Sadece video/output türlerini kontrol et
                     if type_ not in ['output', 'temp'] and key != 'gifs':
+                        logger.info(f"Tip eşleşmedi, atlanıyor")
                         continue
-                    
+
                     # Video dosyasının tam yolunu oluştur
                     if subfolder:
                         video_path = f"/ComfyUI/output/{subfolder}/{filename}"
                     else:
                         video_path = f"/ComfyUI/output/{filename}"
-                    
+
+                    logger.info(f"Video aranıyor: {video_path}")
+                    logger.info(f"Dosya var mı: {os.path.exists(video_path)}")
+
                     if os.path.exists(video_path):
-                        logger.info(f"Video bulundu: {video_path}")
+                        logger.info(f"✅ Video bulundu: {video_path}")
                         with open(video_path, 'rb') as f:
                             video_data = base64.b64encode(f.read()).decode('utf-8')
                             logger.info(f"Video boyutu: {len(video_data)} bytes (base64)")
                             return video_data
                     else:
-                        logger.warning(f"Video dosyası bulunamadı: {video_path}")
-                
+                        logger.warning(f"❌ Video dosyası bulunamadı: {video_path}")
+                        # /ComfyUI/output/ altındaki tüm dosyaları listele
+                        try:
+                            output_files = os.listdir('/ComfyUI/output/')
+                            logger.info(f"Output klasöründeki dosyalar: {output_files}")
+                            # Subfolder'ları da kontrol et
+                            for item_name in output_files:
+                                item_path = f"/ComfyUI/output/{item_name}"
+                                if os.path.isdir(item_path):
+                                    subfiles = os.listdir(item_path)
+                                    logger.info(f"  {item_name}/ içindekiler: {subfiles}")
+                        except Exception as e:
+                            logger.error(f"Output klasörü okunamadı: {e}")
+
                 elif isinstance(item, str):
                     # String formatı için
                     video_path = f"/ComfyUI/output/{item}"
+                    logger.info(f"String item, video aranıyor: {video_path}")
                     if os.path.exists(video_path):
-                        logger.info(f"Video bulundu (string): {video_path}")
+                        logger.info(f"✅ Video bulundu (string): {video_path}")
                         with open(video_path, 'rb') as f:
                             return base64.b64encode(f.read()).decode('utf-8')
-    
+
+    logger.error("❌ Hiçbir key'de video bulunamadı")
     return None
 
 def execute_workflow(prompt):
@@ -156,8 +179,12 @@ def execute_workflow(prompt):
     # Sonuçları al
     history = get_history(prompt_id)
     outputs = history.get('outputs', {})
-    
+
     logger.info(f"Output node'ları: {list(outputs.keys())}")
+
+    # DEBUG: Tam output formatını göster
+    if '80' in outputs:
+        logger.info(f"Node 80 output içeriği: {json.dumps(outputs['80'], indent=2)}")
     
     # Video dosyasını bul (node 80: SaveVideo)
     if '80' in outputs:

@@ -99,7 +99,7 @@
   },
   "80": {
     "inputs": {
-      "filename_prefix": "video/ComfyUI",
+      "filename_prefix": "ComfyUI",
       "format": "auto",
       "codec": "auto",
       "video-preview": "",
