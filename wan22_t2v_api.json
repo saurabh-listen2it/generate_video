@@ -220,21 +220,13 @@
   },
   "56": {
     "inputs": {
-      "blocks_to_swap": 0,
-      "enable_cuda_optimization": true,
-      "enable_dram_optimization": true,
-      "auto_hardware_tuning": false,
-      "vram_threshold_percent": 90,
-      "num_cuda_streams": 6,
-      "bandwidth_target": 0.8,
+      "blocks_to_swap": 20,
       "offload_txt_emb": false,
-      "offload_img_emb": false,
-      "vace_blocks_to_swap": 0,
-      "debug_mode": false
+      "offload_img_emb": false
     },
-    "class_type": "WanVideoEnhancedBlockSwap",
+    "class_type": "WanVideoBlockSwap",
     "_meta": {
-      "title": "WanVideo Enhanced BlockSwap"
+      "title": "WanVideo Block Swap"
     }
   },
   "58": {
