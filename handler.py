@@ -153,10 +153,6 @@ def load_workflow(workflow_path):
 def handler(job):
     job_input = job.get("input", {})
 
-    # Hızlı Test (Ping/Pong) - GPU kullanmadan testi geçmek için
-    if job_input.get("test") == "ping":
-        return {"status": "pong"}
-
     logger.info(f"Received job input: {job_input}")
     task_id = f"task_{uuid.uuid4()}"
 
