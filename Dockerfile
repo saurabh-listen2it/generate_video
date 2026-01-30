@@ -52,7 +52,7 @@ RUN mkdir -p /ComfyUI/models/upscale_models && \
 RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife && \
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
     -d /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife -o rife47.pth \
-    "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation/releases/download/models/rife47.pth"
+    "https://huggingface.co/jasonot/mycomfyui/resolve/main/rife47.pth"
 
 # Diffusion models (Wan2.2 T2V)
 RUN mkdir -p /ComfyUI/models/unet/Wan2.2 && \
