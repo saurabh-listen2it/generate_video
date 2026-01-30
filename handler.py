@@ -96,7 +96,13 @@ def queue_prompt(prompt):
     p = {"prompt": prompt, "client_id": client_id}
     data = json.dumps(p).encode('utf-8')
     req = urllib.request.Request(url, data=data)
-    return json.loads(urllib.request.urlopen(req).read())
+    try:
+        return json.loads(urllib.request.urlopen(req).read())
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8')
+        logger.error(f"❌ ComfyUI Error: {e.code} - {e.reason}")
+        logger.error(f"❌ Error Body: {error_body}")
+        raise e
 
 def get_image(filename, subfolder, folder_type):
     url = f"http://{server_address}:8188/view"
