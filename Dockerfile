@@ -46,14 +46,14 @@ RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirem
 # Model dosyalarını indir (aria2c ile hızlı çoklu bağlantı)
 # Upscale modelini indir
 RUN mkdir -p /ComfyUI/models/upscale_models && \
-    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
+    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true \
     -d /ComfyUI/models/upscale_models -o 4x-UltraSharp.pth \
     "https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth"
 
-# RIFE v4.7 modelini indir (En stabil sürüm)
-RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife && \
-    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true --auto-file-renaming=false \
-    -d /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/models/rife -o rife47.pth \
+# RIFE v4.7 modelini indir (Doğru klasör: vfi_models/rife)
+RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife && \
+    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true \
+    -d /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife -o rife47.pth \
     "https://huggingface.co/jasonot/mycomfyui/resolve/main/rife47.pth"
 
 # Diffusion models (Wan2.2 T2V)
