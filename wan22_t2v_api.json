@@ -13,8 +13,8 @@
   },
   "16": {
     "inputs": {
-      "positive": "cinematic shot, high quality",
-      "negative": "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
+      "positive_prompt": "cinematic shot, high quality",
+      "negative_prompt": "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
       "force_offload": true,
       "use_disk_cache": false,
       "device": "gpu",
@@ -58,7 +58,7 @@
       "rope_function": "comfy",
       "add_noise_to_samples": true,
       "model": [
-        "60",
+        "58",
         0
       ],
       "image_embeds": [
@@ -175,7 +175,7 @@
       "rope_function": "comfy",
       "add_noise_to_samples": false,
       "model": [
-        "62",
+        "55",
         0
       ],
       "image_embeds": [

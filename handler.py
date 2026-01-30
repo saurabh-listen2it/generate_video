@@ -95,6 +95,10 @@ def queue_prompt(prompt):
     logger.info(f"Queueing prompt to: {url}")
     p = {"prompt": prompt, "client_id": client_id}
     data = json.dumps(p).encode('utf-8')
+
+    # Debug: Log the full prompt JSON
+    logger.info(f"📤 Sending prompt JSON (first 500 chars): {json.dumps(p, indent=2)[:500]}...")
+
     req = urllib.request.Request(url, data=data)
     try:
         return json.loads(urllib.request.urlopen(req).read())
@@ -102,6 +106,7 @@ def queue_prompt(prompt):
         error_body = e.read().decode('utf-8')
         logger.error(f"❌ ComfyUI Error: {e.code} - {e.reason}")
         logger.error(f"❌ Error Body: {error_body}")
+        logger.error(f"❌ Prompt that failed (keys): {list(prompt.keys())}")
         raise e
 
 def get_image(filename, subfolder, folder_type):
@@ -179,8 +184,8 @@ def handler(job):
     cfg = job_input.get("cfg", 2.0)
 
     # Ortak parametreleri uygula (Node 16: Text Encode)
-    prompt["16"]["inputs"]["positive"] = job_input["prompt"]
-    prompt["16"]["inputs"]["negative"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
+    prompt["16"]["inputs"]["positive_prompt"] = job_input["prompt"]
+    prompt["16"]["inputs"]["negative_prompt"] = job_input.get("negative_prompt", "bright tones, overexposed, static, blurred details, subtitles, style, works, paintings, images, static, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards")
     
     # Sampler seed/cfg ayarları (Node 27: HIGH, Node 54: LOW)
     if "27" in prompt:
