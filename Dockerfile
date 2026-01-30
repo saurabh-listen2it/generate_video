@@ -41,7 +41,7 @@ RUN cd /ComfyUI/custom_nodes && \
 
 # VideoHelperSuite ve Interpolation bağımlılıkları
 RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirements.txt && \
-    cd /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation && pip install -r requirements.txt
+    cd /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation && pip install -r requirements-no-cupy.txt
 
 # Model dosyalarını indir (aria2c ile hızlı çoklu bağlantı)
 # Upscale modelini indir
