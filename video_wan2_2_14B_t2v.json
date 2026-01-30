@@ -262,7 +262,7 @@
   },
   "91": {
     "inputs": {
-      "upscale_model": "4x-UltraSharp.pth"
+      "model_name": "4x-UltraSharp.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -288,7 +288,7 @@
   "93": {
     "inputs": {
       "upscale_method": "nearest-exact",
-      "upscale_by": 0.5,
+      "scale_by": 0.5,
       "image": [
         "92",
         0

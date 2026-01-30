@@ -298,7 +298,7 @@ def handler(job):
             # Kullanıcı 2x istiyorsa, model 4x büyüttüğü için çarpanı 0.5 yaparız (4 * 0.5 = 2)
             user_upscale = job_input.get("upscale", 2)
             final_scale_multiplier = user_upscale / 4.0
-            prompt["93"]["inputs"]["upscale_by"] = final_scale_multiplier
+            prompt["93"]["inputs"]["scale_by"] = final_scale_multiplier
             logger.info(f"DEBUG: Final Scale Multiplier (Node 93) set to {final_scale_multiplier} (for {user_upscale}x total)")
         
         # Final FPS hesaplama (Orijinal FPS * Çarpan)
