@@ -75,8 +75,8 @@ def get_video_file(node_output):
     """Video dosyasını bul ve oku"""
     logger.info(f"get_video_file çağrıldı, node_output keys: {list(node_output.keys())}")
 
-    # SaveVideo node output formatını kontrol et (ComfyUI 'gifs' key kullanıyor)
-    for key in ['gifs', 'videos', 'files']:
+    # SaveVideo node output formatını kontrol et (VideoHelperSuite 'images' key kullanıyor)
+    for key in ['images', 'gifs', 'videos', 'files']:
         if key in node_output:
             logger.info(f"'{key}' key'i bulundu, içerik: {node_output[key]}")
             for item in node_output[key]:
