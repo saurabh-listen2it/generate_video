@@ -29,11 +29,14 @@ RUN cd /ComfyUI/custom_nodes && \
 RUN cd /ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirements.txt
 RUN cd /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation && pip install -r requirements-no-cupy.txt
 
-# Model: 4x-UltraSharp (Upscale)
+# Model: RealESRGAN_x2plus (Hızlı 2x Upscale)
 RUN mkdir -p /ComfyUI/models/upscale_models && \
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true \
-    -d /ComfyUI/models/upscale_models -o 4x-UltraSharp.pth \
-    "https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth"
+    -d /ComfyUI/models/upscale_models -o RealESRGAN_x2plus.pth \
+    "https://huggingface.co/dtarnow/UPscaler/resolve/main/RealESRGAN_x2plus.pth" && \
+    aria2c -x 16 -s 16 -k 1M --allow-overwrite=true \
+    -d /ComfyUI/models/upscale_models -o RealESRGAN_x2plus.pth \
+    "https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x2plus.pth"
 
 # Model: RIFE 4.7 (Interpolation) - Doğru Klasör: vfi_models/rife
 RUN mkdir -p /ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation/vfi_models/rife && \
@@ -55,7 +58,7 @@ RUN aria2c -x 16 -s 16 -k 1M --allow-overwrite=true -d /ComfyUI/models/clip -o u
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true -d /ComfyUI/models/vae -o wan_2.1_vae.safetensors "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors"
 
 # Cache Buster (Dosyaların güncel halini zorla kopyalamak için)
-ENV CACHE_BUSTER=2026-01-31_v2
+ENV CACHE_BUSTER=2026-01-31_v3
 
 # Çalışma dosyalarını kopyala
 COPY handler.py /handler.py

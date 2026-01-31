@@ -293,13 +293,8 @@ def handler(job):
             prompt["90"]["inputs"]["multiplier"] = multiplier
             logger.info(f"DEBUG: RIFE (Node 90) multiplier set to {multiplier}")
         
-        # Upscale ayarı (Model 4x büyütür, biz buradan çarpanla ayarlarız)
-        if "93" in prompt:
-            # Kullanıcı 2x istiyorsa, model 4x büyüttüğü için çarpanı 0.5 yaparız (4 * 0.5 = 2)
-            user_upscale = float(job_input.get("upscale", 2))
-            final_scale_multiplier = float(user_upscale / 4.0)
-            prompt["93"]["inputs"]["scale_by"] = final_scale_multiplier
-            logger.info(f"DEBUG: Final Scale Multiplier (Node 93) set to {final_scale_multiplier} (for {user_upscale}x total)")
+        # Upscale ayarı (Sabit 2x model kullanıyoruz)
+        logger.info("DEBUG: Using fixed 2x Upscale (RealESRGAN_x2plus)")
         
         # Final FPS hesaplama (Orijinal FPS * Çarpan)
         final_fps = int(fps * multiplier)

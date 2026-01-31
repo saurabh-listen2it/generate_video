@@ -220,26 +220,13 @@
     "inputs": {
       "fps": 32,
       "images": [
-        "90",
+        "92",
         0
       ]
     },
     "class_type": "CreateVideo",
     "_meta": {
       "title": "Video Oluştur"
-    }
-  },
-  "89": {
-    "inputs": {
-      "text": "wall-e animation pixar style a robot on the mars, collecting space stones.",
-      "clip": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Positive Prompt)"
     }
   },
   "90": {
@@ -251,7 +238,7 @@
       "ensemble": false,
       "scale_factor": 1,
       "frames": [
-        "93",
+        "87",
         0
       ]
     },
@@ -262,7 +249,7 @@
   },
   "91": {
     "inputs": {
-      "model_name": "4x-UltraSharp.pth"
+      "model_name": "RealESRGAN_x2plus.pth"
     },
     "class_type": "UpscaleModelLoader",
     "_meta": {
@@ -276,27 +263,13 @@
         0
       ],
       "image": [
-        "87",
+        "90",
         0
       ]
     },
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
       "title": "Görüntü Ölçekle (Model ile)"
-    }
-  },
-  "93": {
-    "inputs": {
-      "upscale_method": "nearest-exact",
-      "scale_by": 0.5,
-      "image": [
-        "92",
-        0
-      ]
-    },
-    "class_type": "ImageScaleBy",
-    "_meta": {
-      "title": "Görüntü Ölçekle (Çarpan ile)"
     }
   }
 }
