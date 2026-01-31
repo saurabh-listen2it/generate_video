@@ -229,6 +229,19 @@
       "title": "Video Oluştur"
     }
   },
+  "89": {
+    "inputs": {
+      "text": "wall-e animation pixar style a robot on the mars, collecting space stones.",
+      "clip": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
   "90": {
     "inputs": {
       "ckpt_name": "rife47.pth",
