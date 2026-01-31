@@ -55,7 +55,7 @@ RUN aria2c -x 16 -s 16 -k 1M --allow-overwrite=true -d /ComfyUI/models/clip -o u
     aria2c -x 16 -s 16 -k 1M --allow-overwrite=true -d /ComfyUI/models/vae -o wan_2.1_vae.safetensors "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors"
 
 # Cache Buster (Dosyaların güncel halini zorla kopyalamak için)
-ENV CACHE_BUSTER=2026-01-31_v4
+ENV CACHE_BUSTER=2026-01-31_v5
 
 # Çalışma dosyalarını kopyala
 COPY handler.py /handler.py
