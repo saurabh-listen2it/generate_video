@@ -198,7 +198,7 @@
       "scale_factor": 1,
       "batch_size": 1,
       "torch_compile": false,
-      "dtype": "auto",
+      "dtype": "float32",
       "frames": ["87", 0]
     },
     "class_type": "RIFE VFI",
