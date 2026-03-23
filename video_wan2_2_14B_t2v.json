@@ -13,10 +13,7 @@
   "72": {
     "inputs": {
       "text": "色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走，裸露，NSFW",
-      "clip": [
-        "71",
-        0
-      ]
+      "clip": ["71", 0]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -75,22 +72,10 @@
       "start_at_step": 2,
       "end_at_step": 4,
       "return_with_leftover_noise": "disable",
-      "model": [
-        "86",
-        0
-      ],
-      "positive": [
-        "89",
-        0
-      ],
-      "negative": [
-        "72",
-        0
-      ],
-      "latent_image": [
-        "81",
-        0
-      ]
+      "model": ["86", 0],
+      "positive": ["89", 0],
+      "negative": ["72", 0],
+      "latent_image": ["81", 0]
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
@@ -103,10 +88,7 @@
       "format": "auto",
       "codec": "auto",
       "video-preview": "",
-      "video": [
-        "88",
-        0
-      ]
+      "video": ["88", 0]
     },
     "class_type": "SaveVideo",
     "_meta": {
@@ -124,22 +106,10 @@
       "start_at_step": 0,
       "end_at_step": 2,
       "return_with_leftover_noise": "enable",
-      "model": [
-        "82",
-        0
-      ],
-      "positive": [
-        "89",
-        0
-      ],
-      "negative": [
-        "72",
-        0
-      ],
-      "latent_image": [
-        "74",
-        0
-      ]
+      "model": ["82", 0],
+      "positive": ["89", 0],
+      "negative": ["72", 0],
+      "latent_image": ["74", 0]
     },
     "class_type": "KSamplerAdvanced",
     "_meta": {
@@ -149,10 +119,7 @@
   "82": {
     "inputs": {
       "shift": 5.000000000000001,
-      "model": [
-        "83",
-        0
-      ]
+      "model": ["83", 0]
     },
     "class_type": "ModelSamplingSD3",
     "_meta": {
@@ -163,10 +130,7 @@
     "inputs": {
       "lora_name": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
       "strength_model": 1.0000000000000002,
-      "model": [
-        "75",
-        0
-      ]
+      "model": ["75", 0]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
@@ -177,10 +141,7 @@
     "inputs": {
       "lora_name": "wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
       "strength_model": 1.0000000000000002,
-      "model": [
-        "76",
-        0
-      ]
+      "model": ["76", 0]
     },
     "class_type": "LoraLoaderModelOnly",
     "_meta": {
@@ -190,10 +151,7 @@
   "86": {
     "inputs": {
       "shift": 5.000000000000001,
-      "model": [
-        "85",
-        0
-      ]
+      "model": ["85", 0]
     },
     "class_type": "ModelSamplingSD3",
     "_meta": {
@@ -202,14 +160,8 @@
   },
   "87": {
     "inputs": {
-      "samples": [
-        "78",
-        0
-      ],
-      "vae": [
-        "73",
-        0
-      ]
+      "samples": ["78", 0],
+      "vae": ["73", 0]
     },
     "class_type": "VAEDecode",
     "_meta": {
@@ -219,10 +171,7 @@
   "88": {
     "inputs": {
       "fps": 32,
-      "images": [
-        "92",
-        0
-      ]
+      "images": ["92", 0]
     },
     "class_type": "CreateVideo",
     "_meta": {
@@ -232,10 +181,7 @@
   "89": {
     "inputs": {
       "text": "wall-e animation pixar style a robot on the mars, collecting space stones.",
-      "clip": [
-        "71",
-        0
-      ]
+      "clip": ["71", 0]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -250,10 +196,10 @@
       "fast_mode": true,
       "ensemble": false,
       "scale_factor": 1,
-      "frames": [
-        "87",
-        0
-      ]
+      "batch_size": 1,
+      "torch_compile": false,
+      "dtype": "auto",
+      "frames": ["87", 0]
     },
     "class_type": "RIFE VFI",
     "_meta": {
@@ -271,14 +217,8 @@
   },
   "92": {
     "inputs": {
-      "upscale_model": [
-        "91",
-        0
-      ],
-      "image": [
-        "90",
-        0
-      ]
+      "upscale_model": ["91", 0],
+      "image": ["90", 0]
     },
     "class_type": "ImageUpscaleWithModel",
     "_meta": {
